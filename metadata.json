@@ -1,0 +1,6 @@
+{
+  "name": "Temp Mail Pro",
+  "description": "Secure and fast temporary email generator powered by mail.tm. Generate multiple addresses and manage your inbox with ease.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
