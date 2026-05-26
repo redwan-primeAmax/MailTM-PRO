@@ -39,15 +39,29 @@ export default function GeneratorPage() {
 
     // Load domains
     useEffect(() => {
-        MailService.getDomains().then(data => {
-            const activeDomains = (data || []).filter(d => d.isActive);
-            setDomains(activeDomains);
-            if (activeDomains.length > 0) setSelectedDomain(activeDomains[0].domain);
-            else setError('No active domains found. Please retry later.');
-        }).catch(err => {
-            setError('Failed to load domains. Please refresh.');
-            console.error(err);
-        });
+        const loadDomains = () => {
+            MailService.getDomains().then(data => {
+                let activeDomains = (data || []).filter(d => d.isActive);
+                
+                // Fallback: If no explicitly active domains, take all available
+                if (activeDomains.length === 0 && data && data.length > 0) {
+                    activeDomains = data;
+                }
+
+                setDomains(activeDomains);
+                if (activeDomains.length > 0) {
+                    setSelectedDomain(activeDomains[0].domain);
+                    setError('');
+                } else {
+                    setError('No active domains returned from service. Please retry later.');
+                }
+            }).catch(err => {
+                setError('Mail service connection error. Please refresh or check your network.');
+                console.error(err);
+            });
+        };
+        
+        loadDomains();
     }, []);
 
     const handleGenerate = async () => {
