@@ -30,16 +30,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: 24
+          cache: 'npm'
 
       - name: Restore Next.js build cache
         uses: actions/cache@v4
         with:
           path: |
             .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
 
       - name: Install dependencies
         run: |
@@ -52,11 +53,16 @@ jobs:
       - name: Build Next.js Static Export
         run: npm run build
 
-      - name: Optimize for Sub-Routing and Bypass Jekyll
+      - name: Post-Build Asset Check
         run: |
-          # Disable Jekyll so folders like _next/ are served properly by GitHub Pages
+          if [ ! -d "out" ]; then
+            echo "Error: 'out' directory not found. Ensuring static export..."
+            exit 1
+          fi
+
+      - name: Optimize for Sub-Routing
+        run: |
           touch out/.nojekyll
-          # Copy index.html to 404.html to resolve direct paths / subpage reload issues
           cp out/index.html out/404.html
 
       - name: Upload Pages artifact
